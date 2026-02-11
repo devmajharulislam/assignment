@@ -98,7 +98,7 @@ export default function ProductsPage() {
               </p>
             </div>
 
-            {/* Filters/Sort - Placeholder */}
+            
             <div className="hidden md:flex items-center gap-4">
               <select className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option>Sort by: Featured</option>
@@ -109,7 +109,7 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Product Count */}
+         
           {!loading && products.length > 0 && (
             <p className="text-sm text-gray-500">
               Showing {products.length} of{" "}
