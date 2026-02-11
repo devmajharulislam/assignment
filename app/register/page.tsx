@@ -1,12 +1,14 @@
+// app/register/page.tsx
 "use client";
 
 import { useState } from "react";
-import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRegisterStore } from "@/store/useAuthStore";
 
 export default function RegisterPage() {
-  const navigate = useRouter();
-  const { register, loading } = useAuthStore();
+  const router = useRouter();
+  const { register, loading, error, success, resetState } = useRegisterStore();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,125 +18,75 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-    submit: "",
-  });
-
-  const validateForm = () => {
-    const newErrors = {
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-      submit: "",
-    };
-
-    let isValid = true;
-
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-      isValid = false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-      isValid = false;
-    }
-
-    // Phone validation (optional, but if provided should be valid)
-    if (formData.phone && formData.phone.length < 10) {
-      newErrors.phone = "Please enter a valid phone number";
-      isValid = false;
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-      isValid = false;
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-      isValid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
+  const [validationError, setValidationError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    setErrors((prev) => ({ ...prev, [name]: "", submit: "" }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setValidationError("");
+    if (error) resetState();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError("");
 
-    if (!validateForm()) return;
+    // Validation
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password
+    ) {
+      setValidationError("All fields are required");
+      return;
+    }
 
-    const success = await register(
-      formData.name,
-      formData.email,
-      formData.phone,
-      formData.password,
-    );
+    if (formData.password !== formData.confirmPassword) {
+      setValidationError("Passwords do not match");
+      return;
+    }
 
-    if (success) {
-      navigate.push("/"); // Redirect to dashboard or home
-    } else {
-      setErrors((prev) => ({
-        ...prev,
-        submit: "Registration failed. Please try again.",
-      }));
+    if (formData.password.length < 6) {
+      setValidationError("Password must be at least 6 characters");
+      return;
+    }
+
+    if (!/^\d{11}$/.test(formData.phone)) {
+      setValidationError("Phone number must be 11 digits");
+      return;
+    }
+
+    const { confirmPassword, ...registerData } = formData;
+    const isSuccess = await register(registerData);
+
+    if (isSuccess) {
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{" "}
-            <a
-              href="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              sign in to your existing account
-            </a>
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20">
+          {/* Logo/Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Create Account
+            </h1>
+            <p className="text-gray-300">Join us today</p>
+          </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            {/* Name Field */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Name Input */}
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-200 mb-2"
               >
                 Full Name
               </label>
@@ -142,23 +94,20 @@ export default function RegisterPage() {
                 id="name"
                 name="name"
                 type="text"
+                placeholder="Enter your full name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your full name"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all"
+                required
+                disabled={loading}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-              )}
             </div>
 
-            {/* Email Field */}
+            {/* Email Input */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-200 mb-2"
               >
                 Email Address
               </label>
@@ -166,48 +115,41 @@ export default function RegisterPage() {
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your email"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all"
+                required
+                disabled={loading}
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
             </div>
 
-            {/* Phone Field */}
+            {/* Phone Input */}
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-200 mb-2"
               >
-                Phone Number (Optional)
+                Phone Number
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
+                placeholder="01XXXXXXXXX (11 digits)"
                 value={formData.phone}
                 onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="01757575758"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all"
+                required
+                disabled={loading}
               />
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-              )}
             </div>
 
-            {/* Password Field */}
+            {/* Password Input */}
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-200 mb-2"
               >
                 Password
               </label>
@@ -215,24 +157,20 @@ export default function RegisterPage() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="new-password"
+                placeholder="Minimum 6 characters"
                 value={formData.password}
                 onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="Enter your password"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all"
+                required
+                disabled={loading}
               />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-              )}
             </div>
 
-            {/* Confirm Password Field */}
+            {/* Confirm Password Input */}
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-200 mb-2"
               >
                 Confirm Password
               </label>
@@ -240,40 +178,85 @@ export default function RegisterPage() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                autoComplete="new-password"
+                placeholder="Re-enter your password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`mt-1 appearance-none relative block w-full px-3 py-2 border ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
-                placeholder="Confirm your password"
+                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all"
+                required
+                disabled={loading}
               />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.confirmPassword}
-                </p>
-              )}
             </div>
-          </div>
 
-          {/* Submit Error */}
-          {errors.submit && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{errors.submit}</p>
-            </div>
-          )}
+            {/* Validation Error */}
+            {validationError && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg">
+                {validationError}
+              </div>
+            )}
 
-          {/* Submit Button */}
-          <div>
+            {/* API Error */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div className="bg-green-500/10 border border-green-500/50 text-green-200 px-4 py-3 rounded-lg">
+                Registration successful! Redirecting to login...
+              </div>
+            )}
+
+            {/* Register Button */}
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-linear-to-r from-[#e94560] to-[#d63447] text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-[#e94560]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Creating account..." : "Register"}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Creating account...
+                </span>
+              ) : (
+                "Create Account"
+              )}
             </button>
+          </form>
+
+          {/* Login Link */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-300">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="text-[#e94560] hover:text-[#d63447] font-semibold transition-colors"
+              >
+                Sign In
+              </Link>
+            </p>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -1,166 +1,197 @@
 import { create } from "zustand";
 
-const API = "https://staging-nextshop-backend.prospectbdltd.com/api";
-
-interface User {
+export interface User {
   id: number;
-  name: string;
   email: string;
-  phone?: string;
+  name: string;
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
-  isInitialized: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (
-    name: string,
-    email: string,
-    phone: string,
-    password: string,
-  ) => Promise<boolean>;
+  checkSession: () => Promise<void>;
   logout: () => void;
-  initAuth: () => Promise<void>;
-  fetchUser: () => Promise<boolean>;
 }
 
+const API = "https://staging-nextshop-backend.prospectbdltd.com/api";
+
+// Helper functions for localStorage
+const getStoredToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("auth_token");
+  }
+  return null;
+};
+
+const getStoredUser = () => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const user = localStorage.getItem("auth_user");
+    if (!user) return null; // no user saved
+    return JSON.parse(user); // safely parse
+  } catch (error) {
+    console.error("Failed to parse stored user:", error);
+    return null; // fallback if invalid JSON
+  }
+};
+
+
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  token: null,
+  user: getStoredUser(),
+  token: getStoredToken(),
   loading: false,
-  isInitialized: false,
-
-  initAuth: async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      set({ token, loading: true });
-      await get().fetchUser();
-    }
-    set({ isInitialized: true });
-  },
-
-  fetchUser: async () => {
-    try {
-      const token = get().token;
-      if (!token) return false;
-
-      const res = await fetch(`${API}/v2/auth/me`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Tenant": "nextshop",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) {
-        // Token is invalid, clear it
-        localStorage.removeItem("token");
-        set({ user: null, token: null, loading: false });
-        return false;
-      }
-
-      const data = await res.json();
-   
-      set({
-        user: data.data.user || data.data,
-        loading: false,
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Fetch user error:", error);
-      localStorage.removeItem("token");
-      set({ user: null, token: null, loading: false });
-      return false;
-    }
-  },
 
   login: async (email, password) => {
+    set({ loading: true });
     try {
-      set({ loading: true });
-
       const res = await fetch(`${API}/v2/auth/login`, {
-   
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Tenant": "nextshop",
+          Accept: "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Login failed:", errorData);
-        throw new Error("Login failed");
+        set({ loading: false });
+        return false;
       }
 
       const data = await res.json();
-    
 
-      localStorage.setItem("token", data.data.token);
+      // Store in localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_token", data.data.token);
+        localStorage.setItem("auth_user", JSON.stringify(data.data.username));
+      }
 
       set({
-        user: data.data.user,
+        user: data.data.username,
         token: data.data.token,
         loading: false,
-        isInitialized: true,
       });
-
       return true;
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
       set({ loading: false });
       return false;
     }
   },
 
-  register: async (name, email, phone, password) => {
-    // ✅ FIXED: parameter order
-    try {
-      set({ loading: true });
+  checkSession: async () => {
+    const token = get().token;
+    if (!token) {
+      set({ user: null, token: null });
+      return;
+    }
 
-      const res = await fetch(`${API}/v2/auth/register`, {
-        // ✅ FIXED: parentheses, not backticks
-        method: "POST",
+    try {
+      const res = await fetch(`${API}/v2/auth/me`, {
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "X-Tenant": "nextshop",
         },
-        body: JSON.stringify({ name, email, phone, password }),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Registration failed:", errorData);
-        throw new Error("Registration failed");
+        // Clear localStorage on failed session check
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("auth_user");
+        }
+        set({ user: null, token: null });
+        return;
       }
 
       const data = await res.json();
-      console.log("Register response:", data);
 
-      localStorage.setItem("token", data.data.token);
+      // Update localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_user", JSON.stringify(data.data));
+      }
 
-      set({
-        user: data.data.user,
-        token: data.data.token,
-        loading: false,
-        isInitialized: true,
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Registration error:", error);
-      set({ loading: false });
-      return false;
+      set({ user: data.data });
+    } catch {
+      // Clear localStorage on error
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+      }
+      set({ user: null, token: null });
     }
   },
 
   logout: () => {
-    localStorage.removeItem("token");
+    // Clear localStorage on logout
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+    }
     set({ user: null, token: null });
+  },
+}));
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
+interface RegisterState {
+  loading: boolean;
+  error: string | null;
+  success: boolean;
+  register: (data: RegisterData) => Promise<boolean>;
+  resetState: () => void;
+}
+
+export const useRegisterStore = create<RegisterState>((set) => ({
+  loading: false,
+  error: null,
+  success: false,
+
+  register: async (data: RegisterData) => {
+    set({ loading: true, error: null, success: false });
+    try {
+      const res = await fetch(`${API}/v2/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Tenant": "nextshop",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        set({
+          loading: false,
+          error: errorData.message || "Registration failed",
+          success: false,
+        });
+        return false;
+      }
+
+      const responseData = await res.json();
+      set({ loading: false, error: null, success: true });
+      return true;
+    } catch (err) {
+      set({
+        loading: false,
+        error: "Network error. Please try again.",
+        success: false,
+      });
+      return false;
+    }
+  },
+
+  resetState: () => {
+    set({ loading: false, error: null, success: false });
   },
 }));
