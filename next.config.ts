@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn-nextshop.prospectbdltd.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn-staging-nextshop.prospectbdltd.com",
+      },
     ],
   },
 };

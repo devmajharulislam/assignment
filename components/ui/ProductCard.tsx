@@ -2,27 +2,35 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { Product } from "@/store/useProductStore";
 
 interface ProductCardProps {
   product: Product;
 }
 
+function resolveImage(thumbnail?: string) {
+  if (!thumbnail) return "/placeholder.jpg";
+
+  if (thumbnail.startsWith("http")) return thumbnail;
+
+  return `${process.env.NEXT_PUBLIC_CDN_BASEURL}/${thumbnail}`;
+}
+
 export default function ProductCard({ product }: ProductCardProps) {
-  const imageUrl = `https://cdn-nextshop.prospectbdltd.com/api/temporary-url/${product.thumbnail}`;
+  const [imgSrc, setImgSrc] = useState(resolveImage(product.thumbnail));
   const rating = Number(product.rating) || 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    // Get existing cart from localStorage
     const stored = localStorage.getItem("cart");
     const cart: Product[] = stored ? JSON.parse(stored) : [];
 
-    // Check if product already exists in cart
     const exists = cart.find((p) => p.productId === product.productId);
+
     if (!exists) {
-      cart.push({ ...product, quantity: 1 }); // add quantity field
+      cart.push({ ...product, quantity: 1 });
       localStorage.setItem("cart", JSON.stringify(cart));
       alert(`${product.productName} added to cart!`);
     } else {
@@ -36,12 +44,14 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
-            src={imageUrl}
+            src={imgSrc}
             alt={product.productName}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-300"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            onError={() => setImgSrc("/placeholder.jpg")}
           />
+
           {!product.inStock && (
             <div className="absolute top-3 left-3 bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold">
               Out of Stock
@@ -87,10 +97,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Price */}
           <span className="text-2xl font-bold text-gray-900">
-            ${Number(product.finalPrice).toFixed(2)}
+            ${Number(product.finalPrice || 0).toFixed(2)}
           </span>
 
-          {/* Add to Cart Button */}
+          {/* Add to Cart */}
           <button
             className={`mt-4 w-full py-2.5 rounded-lg font-medium transition-colors ${
               product.inStock

@@ -129,7 +129,7 @@ export default function HomePage() {
 
           <div className="md:w-1/2 relative h-80 md:h-96">
             <Image
-              src="/hero-products.png"
+              src="/placeholder.jpg"
               alt="NextShop Products"
               fill
               className="object-cover rounded-xl shadow-lg"

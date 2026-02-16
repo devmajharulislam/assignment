@@ -5,17 +5,27 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useProductsStore, Product } from "@/store/useProductStore";
 
+function resolveImage(thumbnail?: string | null) {
+  if (!thumbnail) return "/placeholder.jpg";
+
+  if (thumbnail.startsWith("http")) return thumbnail;
+
+  return `${process.env.NEXT_PUBLIC_CDN_BASEURL}/${thumbnail}`;
+}
+
 export default function ProductDetailsPage() {
   const { slug } = useParams<{ slug: string }>();
   const { fetchProductBySlug } = useProductsStore();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imgSrc, setImgSrc] = useState("/placeholder.jpg");
 
   useEffect(() => {
     async function load() {
       const data = await fetchProductBySlug(slug);
       setProduct(data);
+      setImgSrc(resolveImage(data?.thumbnail));
       setLoading(false);
     }
     load();
@@ -37,24 +47,19 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const imageUrl = `https://cdn-nextshop.prospectbdltd.com/api/temporary-url/${product.thumbnail}`;
-
-  // ✅ Add to Cart using the same logic as Products Page
+  // Add to cart
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    if (!product) return;
-
-    // Get existing cart from localStorage
     const stored = localStorage.getItem("cart");
     const cart: (Product & { quantity: number })[] = stored
       ? JSON.parse(stored)
       : [];
 
-    // Check if product is already in cart
     const exists = cart.find((p) => p.productId === product.productId);
+
     if (!exists) {
-      cart.push({ ...product, quantity: 1 }); // add quantity field
+      cart.push({ ...product, quantity: 1 });
       localStorage.setItem("cart", JSON.stringify(cart));
       alert(`${product.productName} added to cart!`);
     } else {
@@ -68,10 +73,11 @@ export default function ProductDetailsPage() {
         {/* Image */}
         <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden shadow-inner">
           <Image
-            src={imageUrl}
+            src={imgSrc}
             alt={product.productName}
             fill
             className="object-cover"
+            onError={() => setImgSrc("/placeholder.jpg")}
           />
         </div>
 

@@ -4,7 +4,10 @@ import { useEffect } from "react";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import CategoryCard from "@/components/ui/CategoryCard";
 
+
+
 export default function CategoriesPage() {
+  // const imageSrc = resolveImage(category.imageUrl);
   const { categories, loading, error, fetchCategories } =
     useCategoryStore();
 
@@ -36,6 +39,7 @@ export default function CategoriesPage() {
             {error}
           </div>
         )}
+      
 
         {!loading && !error && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">

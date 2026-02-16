@@ -8,11 +8,22 @@ import Link from "next/link";
 interface CartItem {
   productId: number;
   productName: string;
-  thumbnail: string;
+  thumbnail?: string;
   finalPrice: number;
   quantity: number;
   inStock: boolean;
   stockQuantity: number;
+}
+
+// Helper to resolve image URL
+function resolveImage(thumbnail: string) {
+  // If thumbnail is a “via.placeholder.com” image, treat as empty
+  if (!thumbnail || thumbnail.includes("via.placeholder.com"))
+    return "/placeholder.jpg";
+
+  // If already a full URL (real CDN), use it directly
+  if (thumbnail.startsWith("http")) return thumbnail;
+  return `https://cdn-staging-nextshop.prospectbdltd.com/api/temporary-url/${thumbnail}`;
 }
 
 export default function CartPage() {
@@ -80,73 +91,69 @@ export default function CartPage() {
             </div>
           )}
 
-          {cart.map((product) => {
-            const imageUrl = `https://cdn-nextshop.prospectbdltd.com/api/temporary-url/${product.thumbnail}`;
+          {cart.map((product) => (
+            <div
+              key={product.productId}
+              className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-row gap-4 p-4"
+            >
+              {/* Image */}
+              <div className="relative w-32 aspect-square bg-gray-100 flex-shrink-0">
+                <Image
+                  src={resolveImage(product.thumbnail)}
+                  alt={product.productName}
+                  fill
+                  className="object-cover rounded-lg"
+                />
+              </div>
 
-            return (
-              <div
-                key={product.productId}
-                className="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-row gap-4 p-4"
-              >
-                {/* Image */}
-                <div className="relative w-32 aspect-square bg-gray-100 flex-shrink-0">
-                  <Image
-                    src={imageUrl}
-                    alt={product.productName}
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                </div>
+              {/* Info */}
+              <div className="flex flex-col flex-1">
+                <h3 className="font-semibold text-black mb-2">
+                  {product.productName}
+                </h3>
 
-                {/* Info */}
-                <div className="flex flex-col flex-1">
-                  <h3 className="font-semibold text-black mb-2">
-                    {product.productName}
-                  </h3>
+                <p className="text-gray-700 mb-1">
+                  {product.inStock ? (
+                    <span className="text-green-600 font-medium">
+                      In Stock ({product.stockQuantity})
+                    </span>
+                  ) : (
+                    <span className="text-red-600 font-medium">
+                      Out of Stock
+                    </span>
+                  )}
+                </p>
 
-                  <p className="text-gray-700 mb-1">
-                    {product.inStock ? (
-                      <span className="text-green-600 font-medium">
-                        In Stock ({product.stockQuantity})
-                      </span>
-                    ) : (
-                      <span className="text-red-600 font-medium">
-                        Out of Stock
-                      </span>
-                    )}
-                  </p>
+                <p className="text-indigo-600 font-bold mb-4">
+                  ${product.finalPrice.toFixed(2)}
+                </p>
 
-                  <p className="text-indigo-600 font-bold mb-4">
-                    ${product.finalPrice}
-                  </p>
-
-                  {/* Quantity controls */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <button
-                      onClick={() => decrement(product.productId)}
-                      className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
-                    >
-                      -
-                    </button>
-                    <span className="font-semibold">{product.quantity}</span>
-                    <button
-                      onClick={() => increment(product.productId)}
-                      className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
-                    >
-                      +
-                    </button>
-                  </div>
-
+                {/* Quantity controls */}
+                <div className="flex items-center gap-2 mb-4">
                   <button
-                    onClick={() => removeItem(product.productId)}
-                    className="mt-auto bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition w-32"
+                    onClick={() => decrement(product.productId)}
+                    className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
                   >
-                    Remove
+                    -
+                  </button>
+                  <span className="font-semibold">{product.quantity}</span>
+                  <button
+                    onClick={() => increment(product.productId)}
+                    className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  >
+                    +
                   </button>
                 </div>
+
+                <button
+                  onClick={() => removeItem(product.productId)}
+                  className="mt-auto bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition w-32"
+                >
+                  Remove
+                </button>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
         {/* Order Summary */}
