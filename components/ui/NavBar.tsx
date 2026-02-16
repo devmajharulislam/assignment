@@ -33,107 +33,87 @@ export default function NavBar() {
   };
 
   return (
-    <header className="w-full border-b bg-white">
+    <header className="sticky top-0 z-50 bg-white border-b">
       <div className="mx-auto max-w-7xl px-6 py-3 flex items-center justify-between">
-        {/* Left - Logo */}
-        <div className="flex items-center gap-2">
-          <Link href="/" className="font-semibold text-lg text-gray-900">
-            MyStore
-          </Link>
-        </div>
+        {/* Logo */}
+        <Link href="/" className="text-2xl font-bold tracking-tight">
+          <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            NextShop
+          </span>
+        </Link>
 
-        {/* Center - Navigation Links */}
-        <nav className="flex items-center gap-6">
-          <Link
-            href="/"
-            className="hover:text-indigo-600 text-gray-800 transition-colors"
-          >
-            Home
-          </Link>
-          <Link
-            href="/products"
-            className="hover:text-indigo-600 text-gray-800 transition-colors"
-          >
-            Products
-          </Link>
-          <Link
-            href="/category"
-            className="hover:text-indigo-600 text-gray-800 transition-colors"
-          >
-            Category
-          </Link>
-          <Link
-            href="/cart"
-            className="hover:text-indigo-600 text-gray-800 transition-colors"
-          >Cart</Link>
+        {/* Nav links */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          {["Home", "Products", "Category", "Cart"].map((item) => (
+            <Link
+              key={item}
+              href={`/${item === "Home" ? "" : item.toLowerCase()}`}
+              className="text-gray-800 hover:text-indigo-600 transition"
+            >
+              {item}
+            </Link>
+          ))}
         </nav>
 
-        {/* Right - Auth Section */}
+        {/* Right side */}
         <div className="flex items-center gap-3">
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 transition-all"
+                className="flex items-center gap-3 px-3 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition"
               >
-                <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center text-white font-semibold text-sm">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-gray-900 font-medium text-sm">
-                  {user.name}
-                </span>
-                <svg
-                  className={`w-4 h-4 text-gray-600 transition-transform ${
-                    dropdownOpen ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+
+                <div className="text-left hidden sm:block">
+                  <p className="text-sm font-semibold text-gray-900 leading-tight">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-500 leading-tight">
+                    View profile
+                  </p>
+                </div>
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-gray-300">
-                    <p className="text-xs text-gray-500">Signed in as</p>
-                    <p className="text-sm font-medium text-gray-900 truncate mt-1">
+                <div className="absolute right-0 mt-3 w-64 bg-white border rounded-2xl overflow-hidden">
+                  <div className="px-5 py-4 border-b">
+                    <p className="text-xs text-gray-600">Signed in as</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">
                       {user.email}
                     </p>
                   </div>
-                  <div className="py-1">
+
+                  <div className="py-2 text-sm font-medium">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
                       onClick={() => setDropdownOpen(false)}
+                      className="block px-5 py-2 text-gray-900 hover:bg-gray-200 transition"
                     >
-                      Your Profile
+                      Profile
                     </Link>
                     <Link
                       href="/orders"
-                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
                       onClick={() => setDropdownOpen(false)}
+                      className="block px-5 py-2 text-gray-900 hover:bg-gray-200 transition"
                     >
                       Orders
                     </Link>
                     <Link
                       href="/settings"
-                      className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors"
                       onClick={() => setDropdownOpen(false)}
+                      className="block px-5 py-2 text-gray-900 hover:bg-gray-200 transition"
                     >
                       Settings
                     </Link>
                   </div>
-                  <div className="border-t border-gray-300">
+
+                  <div className="border-t">
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                      className="w-full text-left px-5 py-3 text-sm font-semibold text-red-700 hover:bg-red-100 transition"
                     >
                       Sign out
                     </button>
@@ -143,10 +123,10 @@ export default function NavBar() {
             </div>
           ) : (
             <>
-              <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-6">
                 <Link href="/login">Login</Link>
               </Button>
-              <Button className="rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button className="rounded-full bg-gray-900 hover:bg-black text-white px-6">
                 <Link href="/register">Register</Link>
               </Button>
             </>
