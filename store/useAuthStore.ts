@@ -10,9 +10,12 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
+  isAuthenticated: boolean;
+  isInitialized: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   checkSession: () => Promise<void>;
   logout: () => void;
+  initAuth: () => Promise<void>;
 }
 
 const API = "https://staging-nextshop-backend.prospectbdltd.com/api";
@@ -30,22 +33,46 @@ const getStoredUser = () => {
 
   try {
     const user = localStorage.getItem("auth_user");
-    if (!user) return null; // no user saved
-    return JSON.parse(user); // safely parse
+    if (!user) return null;
+    return JSON.parse(user);
   } catch (error) {
     console.error("Failed to parse stored user:", error);
-    return null; // fallback if invalid JSON
+    return null;
   }
 };
 
-
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: getStoredUser(),
-  token: getStoredToken(),
+  user: null,
+  token: null,
   loading: false,
+  isAuthenticated: false,
+  isInitialized: false,
+
+  initAuth: async () => {
+    console.log("🔄 Initializing auth...");
+
+    const token = getStoredToken();
+    const user = getStoredUser();
+
+    if (!token) {
+      console.log("❌ No token found");
+      set({ isInitialized: true, isAuthenticated: false });
+      return;
+    }
+
+    // Set token and user from localStorage
+    set({ token, user });
+
+    // Verify token with backend
+    await get().checkSession();
+
+    set({ isInitialized: true });
+  },
 
   login: async (email, password) => {
+    console.log("🔐 Logging in...");
     set({ loading: true });
+
     try {
       const res = await fetch(`${API}/v2/auth/login`, {
         method: "POST",
@@ -58,25 +85,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (!res.ok) {
+        console.log("❌ Login failed");
         set({ loading: false });
         return false;
       }
 
       const data = await res.json();
+      const token = data.data.token;
 
-      // Store in localStorage
+      console.log("✅ Login successful, token received");
+
+      // Save token to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("auth_token", data.data.token);
-        localStorage.setItem("auth_user", JSON.stringify(data.data.username));
+        localStorage.setItem("auth_token", token);
       }
 
-      set({
-        user: data.data.username,
-        token: data.data.token,
-        loading: false,
+      // Set token in state
+      set({ token });
+
+      // Immediately fetch user data using /me API
+      console.log("🔍 Fetching user data from /me API...");
+      const userRes = await fetch(`${API}/v2/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Tenant": "nextshop",
+        },
       });
+
+      if (!userRes.ok) {
+        console.error("❌ Failed to fetch user data");
+        set({ loading: false });
+        return false;
+      }
+
+      const userData = await userRes.json();
+      const user = userData.data;
+
+      console.log("✅ User data fetched:", user);
+
+      // Save user to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_user", JSON.stringify(user));
+      }
+
+      // Update state with complete user data
+      set({
+        user,
+        loading: false,
+        isAuthenticated: true,
+        isInitialized: true,
+      });
+
+      console.log("✅ Login complete with user data");
       return true;
     } catch (err) {
+      console.error("❌ Login error:", err);
       set({ loading: false });
       return false;
     }
@@ -84,10 +147,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   checkSession: async () => {
     const token = get().token;
+
     if (!token) {
-      set({ user: null, token: null });
+      console.log("❌ No token to check");
+      set({ user: null, token: null, isAuthenticated: false });
       return;
     }
+
+    console.log("🔍 Checking session...");
 
     try {
       const res = await fetch(`${API}/v2/auth/me`, {
@@ -98,40 +165,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (!res.ok) {
-        // Clear localStorage on failed session check
+        console.log("❌ Session invalid");
+
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth_token");
           localStorage.removeItem("auth_user");
         }
-        set({ user: null, token: null });
+
+        set({ user: null, token: null, isAuthenticated: false });
         return;
       }
 
       const data = await res.json();
 
-      // Update localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("auth_user", JSON.stringify(data.data));
       }
 
-      set({ user: data.data });
-    } catch {
-      // Clear localStorage on error
+      set({ user: data.data, isAuthenticated: true });
+      console.log("✅ Session valid");
+    } catch (err) {
+      console.error("❌ Session check error:", err);
+
       if (typeof window !== "undefined") {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
       }
-      set({ user: null, token: null });
+
+      set({ user: null, token: null, isAuthenticated: false });
     }
   },
 
   logout: () => {
-    // Clear localStorage on logout
+    console.log("🚪 Logging out...");
+
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
     }
-    set({ user: null, token: null });
+
+    set({ user: null, token: null, isAuthenticated: false });
   },
 }));
 
