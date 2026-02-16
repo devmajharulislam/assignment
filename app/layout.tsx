@@ -1,4 +1,5 @@
-import NavBar from "@/components/ui/NavBar";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 // import NavBar from "@/components/ui/NavBar";
 import AuthProvider from "@/components/ui/AuthInitializer";
@@ -17,18 +18,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-900 text-black">
-        <AuthInitializer/>
-          {/* <Navbar /> */}
-          <main className=" ">
-            {/* <Navbar /> */}
-    
-              <NavBar/>
-              {children}
-    <Footer/>
-          </main>
-        
+      <body className={inter.className}>
+        {/* AuthGuard wraps the entire app */}
+        <NavBar/>
+        <AuthGuard>{children}</AuthGuard>
+      <Footer/>
       </body>
+
     </html>
   );
 }
