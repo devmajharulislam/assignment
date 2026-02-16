@@ -10,12 +10,12 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
-  isAuthenticated: boolean; // ✅ NEW: Track if user is authenticated
-  isInitialized: boolean; // ✅ NEW: Track if auth check is complete
+  isAuthenticated: boolean;
+  isInitialized: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   checkSession: () => Promise<void>;
   logout: () => void;
-  initAuth: () => Promise<void>; // ✅ NEW: Initialize auth on app start
+  initAuth: () => Promise<void>;
 }
 
 const API = "https://staging-nextshop-backend.prospectbdltd.com/api";
@@ -42,13 +42,12 @@ const getStoredUser = () => {
 };
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null, // ✅ Changed: Start as null, will be set by initAuth
-  token: null, // ✅ Changed: Start as null, will be set by initAuth
+  user: null,
+  token: null,
   loading: false,
-  isAuthenticated: false, // ✅ NEW
-  isInitialized: false, // ✅ NEW
+  isAuthenticated: false,
+  isInitialized: false,
 
-  // ✅ NEW: Initialize auth on app start
   initAuth: async () => {
     console.log("🔄 Initializing auth...");
 
@@ -94,9 +93,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const data = await res.json();
       const token = data.data.token;
 
-      console.log("✅ Token received, fetching user data...");
+      console.log("✅ Login successful, token received");
 
-      // ✅ FIXED: Fetch user data from /me API immediately after login
+      // Save token to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("auth_token", token);
+      }
+
+      // Set token in state
+      set({ token });
+
+      // Immediately fetch user data using /me API
+      console.log("🔍 Fetching user data from /me API...");
       const userRes = await fetch(`${API}/v2/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -115,21 +123,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       console.log("✅ User data fetched:", user);
 
-      // Store in localStorage
+      // Save user to localStorage
       if (typeof window !== "undefined") {
-        localStorage.setItem("auth_token", token);
         localStorage.setItem("auth_user", JSON.stringify(user));
       }
 
+      // Update state with complete user data
       set({
         user,
-        token,
         loading: false,
-        isAuthenticated: true, // ✅ NEW: Set authenticated flag
-        isInitialized: true, // ✅ NEW: Mark as initialized
+        isAuthenticated: true,
+        isInitialized: true,
       });
 
-      console.log("✅ Login complete");
+      console.log("✅ Login complete with user data");
       return true;
     } catch (err) {
       console.error("❌ Login error:", err);
@@ -143,7 +150,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (!token) {
       console.log("❌ No token to check");
-      set({ user: null, token: null, isAuthenticated: false }); // ✅ Updated
+      set({ user: null, token: null, isAuthenticated: false });
       return;
     }
 
@@ -160,56 +167,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (!res.ok) {
         console.log("❌ Session invalid");
 
-        // Clear localStorage on failed session check
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth_token");
           localStorage.removeItem("auth_user");
         }
 
-        set({ user: null, token: null, isAuthenticated: false }); // ✅ Updated
+        set({ user: null, token: null, isAuthenticated: false });
         return;
       }
 
       const data = await res.json();
 
-      // Update localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem("auth_user", JSON.stringify(data.data));
       }
 
-      set({
-        user: data.data,
-        isAuthenticated: true, // ✅ NEW: Set authenticated flag
-      });
-
+      set({ user: data.data, isAuthenticated: true });
       console.log("✅ Session valid");
     } catch (err) {
       console.error("❌ Session check error:", err);
 
-      // Clear localStorage on error
       if (typeof window !== "undefined") {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("auth_user");
       }
 
-      set({ user: null, token: null, isAuthenticated: false }); // ✅ Updated
+      set({ user: null, token: null, isAuthenticated: false });
     }
   },
 
   logout: () => {
     console.log("🚪 Logging out...");
 
-    // Clear localStorage on logout
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
     }
 
-    set({
-      user: null,
-      token: null,
-      isAuthenticated: false, // ✅ NEW: Clear authenticated flag
-    });
+    set({ user: null, token: null, isAuthenticated: false });
   },
 }));
 
