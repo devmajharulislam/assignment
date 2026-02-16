@@ -62,6 +62,10 @@ export default function NavBar() {
           >
             Category
           </Link>
+          <Link
+            href="/cart"
+            className="hover:text-indigo-600 text-gray-800 transition-colors"
+          >Cart</Link>
         </nav>
 
         {/* Right - Auth Section */}

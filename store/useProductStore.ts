@@ -5,49 +5,57 @@ const API = "https://staging-nextshop-backend.prospectbdltd.com/api";
 export interface Product {
   productId: number;
   productName: string;
-  description: string;
-  finalPrice: number;
-  sale_price?: number;
+  slug: string;
   thumbnail: string | null;
-  images?: string[];
-  stock: number;
-  category?: {
-    id: number;
-    name: string;
+  shortDescription: string;
+  featured: boolean;
+  quantity: number;
+
+  originalPrice: number;
+  finalPrice: number;
+
+  discount?: {
+    enabled: boolean;
+    type: string;
+    amount: string;
   };
+
+  stockQuantity: number;
+  inStock: boolean;
+  availability: string;
+
+  shippingCost: string;
+
+  rating: string;
+  likesCount: number;
+  commentsCount: number;
+
   brand?: {
-    id: number;
-    name: string;
+    brandName: string;
+    shortName: string;
   };
-  rating?: number;
-  reviews_count?: number;
 }
 
 interface ProductsState {
   products: Product[];
   loading: boolean;
   error: string | null;
-  currentPage: number;
-  totalPages: number;
-  totalProducts: number;
 
-  fetchProducts: (page?: number) => Promise<void>;
+  fetchProducts: () => Promise<void>;
   fetchProductById: (id: number) => Promise<Product | null>;
+  fetchProductBySlug: (slug: string) => Promise<Product | null>;
 }
 
-export const useProductsStore = create<ProductsState>((set, get) => ({
+export const useProductsStore = create<ProductsState>((set) => ({
   products: [],
   loading: false,
   error: null,
-  currentPage: 1,
-  totalPages: 1,
-  totalProducts: 0,
 
-  fetchProducts: async (page = 1) => {
+  fetchProducts: async () => {
     try {
       set({ loading: true, error: null });
 
-      const res = await fetch(`${API}/client/v1/products?page=${page}`, {
+      const res = await fetch(`${API}/client/v1/products`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -60,13 +68,9 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       }
 
       const data = await res.json();
-      
 
       set({
-        products: data.data.data || data.data || [],
-        currentPage: data.data.current_page || page,
-        totalPages: data.data.last_page || 1,
-        totalProducts: data.data.total || 0,
+        products: data.data ?? [],
         loading: false,
       });
     } catch (error) {
@@ -75,6 +79,24 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
         error: "Failed to load products. Please try again.",
         loading: false,
       });
+    }
+  },
+  fetchProductBySlug: async (slug: string) => {
+    try {
+      const res = await fetch(`${API}/client/v1/products/slug/${slug}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Tenant": "nextshop",
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch product");
+
+      const data = await res.json();
+      return data.data || null;
+    } catch (err) {
+      console.error(err);
+      return null;
     }
   },
 
@@ -93,9 +115,7 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       }
 
       const data = await res.json();
-      console.log("Product detail response:", data);
-
-      return data.data || null;
+      return data.data ?? null;
     } catch (error) {
       console.error("Fetch product error:", error);
       return null;
