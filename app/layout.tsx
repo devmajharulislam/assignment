@@ -3,7 +3,11 @@ import "./globals.css";
 // import NavBar from "@/components/ui/NavBar";
 import AuthProvider from "@/components/ui/AuthInitializer";
 import AuthInitializer from "@/components/ui/AuthInitializer";
+
+import Footer from "@/components/ui/Footer";
+
 import Footer from "@/components/Footer";
+
 // import AppLayout from "@/components/ui/AppLayout";
 
 export default function RootLayout({
