@@ -1,15 +1,10 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import AuthGuard from "@/components/AuthGuard";
 import NavBar from "@/components/ui/NavBar";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "NextShop - Your Online Store",
-  description: "Discover amazing products",
-};
+import "./globals.css";
+// import NavBar from "@/components/ui/NavBar";
+import AuthProvider from "@/components/ui/AuthInitializer";
+import AuthInitializer from "@/components/ui/AuthInitializer";
+import Footer from "@/components/ui/Footer";
+// import AppLayout from "@/components/ui/AppLayout";
 
 export default function RootLayout({
   children,
@@ -18,11 +13,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AuthGuard>
-          <NavBar />
-          {children}
-        </AuthGuard>
+      <body className="bg-gray-900 text-black">
+        <AuthInitializer/>
+          {/* <Navbar /> */}
+          <main className=" ">
+            {/* <Navbar /> */}
+    
+              <NavBar/>
+              {children}
+    <Footer/>
+          </main>
+        
       </body>
     </html>
   );
