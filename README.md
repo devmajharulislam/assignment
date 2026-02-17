@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project README
 
-## Getting Started
+## AI Tools Used
+This project was developed with assistance from:
 
-First, run the development server:
+- **ChatGPT (OpenAI)** – for debugging, UI logic refinement, and architectural guidance in a Next.js + React environment.
+- **Claude (Anthropic)** – used for reviewing code patterns, improving prompt clarity, and suggesting alternative implementation approaches.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Prompting Approach
+Prompts were written in a task-oriented style, focusing on:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Describing the exact bug or behavior
+- Providing full code snippets for context
+- Requesting targeted fixes instead of general explanations
+- Iterating quickly based on runtime errors
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The workflow followed a loop:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+problem → minimal explanation → test → refine
 
-## Learn More
+This allowed rapid debugging and UI iteration while keeping control of final implementation decisions.
 
-To learn more about Next.js, take a look at the following resources:
+## Manual Changes Made
+Several adjustments were applied manually after AI suggestions:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- TypeScript strict typing fixes
+- Hook ordering corrections
+- Image fallback behavior tuning
+- Zustand store integration cleanup
+- Placeholder image handling for CDN failures
+- UI polish and styling adjustments
+- Error handling improvements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
+- The project was deployed on **Netlify**, ensuring continuous integration and live hosting.
+- Git workflow followed proper practices: feature branches, commits with meaningful messages, and merging via pull requests to maintain code stability.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The final code reflects developer judgment layered on top of AI suggestions rather than direct copy-paste output.
