@@ -13,12 +13,7 @@ export default function Navbar() {
 
     // Debug: Log state changes
     useEffect(() => {
-        console.log("📊 Navbar state:", {
-            user,
-            isAuthenticated,
-            isInitialized,
-            hasUser: !!user,
-        });
+
     }, [user, isAuthenticated, isInitialized]);
 
     // Close dropdown when clicking outside
