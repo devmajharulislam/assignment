@@ -49,13 +49,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isInitialized: false,
 
   initAuth: async () => {
-    console.log("🔄 Initializing auth...");
+    // console.log("🔄 Initializing auth...");
 
     const token = getStoredToken();
     const user = getStoredUser();
 
     if (!token) {
-      console.log("❌ No token found");
+      // console.log("❌ No token found");
       set({ isInitialized: true, isAuthenticated: false });
       return;
     }
@@ -70,7 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   login: async (email, password) => {
-    console.log("🔐 Logging in...");
+    // console.log("🔐 Logging in...");
     set({ loading: true });
 
     try {
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (!res.ok) {
-        console.log("❌ Login failed");
+        // console.log("❌ Login failed");
         set({ loading: false });
         return false;
       }
@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const data = await res.json();
       const token = data.data.token;
 
-      console.log("✅ Login successful, token received");
+      // console.log("✅ Login successful, token received");
 
       // Save token to localStorage
       if (typeof window !== "undefined") {
@@ -104,7 +104,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ token });
 
       // Immediately fetch user data using /me API
-      console.log("🔍 Fetching user data from /me API...");
+      // console.log("🔍 Fetching user data from /me API...");
       const userRes = await fetch(`${API}/v2/auth/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const userData = await userRes.json();
       const user = userData.data;
 
-      console.log("✅ User data fetched:", user);
+      // console.log("✅ User data fetched:", user);
 
       // Save user to localStorage
       if (typeof window !== "undefined") {
@@ -136,7 +136,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isInitialized: true,
       });
 
-      console.log("✅ Login complete with user data");
+      // console.log("✅ Login complete with user data");
       return true;
     } catch (err) {
       console.error("❌ Login error:", err);
@@ -149,12 +149,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const token = get().token;
 
     if (!token) {
-      console.log("❌ No token to check");
+      // console.log("❌ No token to check");
       set({ user: null, token: null, isAuthenticated: false });
       return;
     }
 
-    console.log("🔍 Checking session...");
+    // console.log("🔍 Checking session...");
 
     try {
       const res = await fetch(`${API}/v2/auth/me`, {
@@ -165,7 +165,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
 
       if (!res.ok) {
-        console.log("❌ Session invalid");
+        // console.log("❌ Session invalid");
 
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth_token");
@@ -183,7 +183,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       set({ user: data.data, isAuthenticated: true });
-      console.log("✅ Session valid");
+      // console.log("✅ Session valid");
     } catch (err) {
       console.error("❌ Session check error:", err);
 
@@ -197,7 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
-    console.log("🚪 Logging out...");
+    // console.log("🚪 Logging out...");
 
     if (typeof window !== "undefined") {
       localStorage.removeItem("auth_token");
