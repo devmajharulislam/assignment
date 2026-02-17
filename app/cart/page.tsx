@@ -99,7 +99,9 @@ export default function CartPage() {
               {/* Image */}
               <div className="relative w-32 aspect-square bg-gray-100 flex-shrink-0">
                 <Image
-                  src={resolveImage(product.thumbnail)}
+                    src={product.thumbnail
+                        ? resolveImage(product.thumbnail)
+                        : "/placeholder.jpg"}
                   alt={product.productName}
                   fill
                   className="object-cover rounded-lg"

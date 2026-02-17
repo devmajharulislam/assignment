@@ -4,7 +4,7 @@
  */
 
 const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_BASEURL || 
-  "https://cdn-nextshop.prospectbdltd.com/api/temporary-url";
+  "https://cdn-staging-nextshop.prospectbdltd.com/api/temporary-url";
 
 /**
  * Check if a string is a UUID

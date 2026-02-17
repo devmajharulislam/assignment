@@ -7,14 +7,14 @@ import CategoryCard from "@/components/ui/CategoryCard";
 
 
 export default function CategoriesPage() {
-  // const imageSrc = resolveImage(category.imageUrl);
+      
   const { categories, loading, error, fetchCategories } =
     useCategoryStore();
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
-
+    
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
@@ -51,4 +51,5 @@ export default function CategoriesPage() {
       </section>
     </div>
   );
+  
 }

@@ -7,6 +7,8 @@ import { Product } from "@/store/useProductStore";
 
 interface ProductCardProps {
   product: Product;
+
+  
 }
 
 function resolveImage(thumbnail?: string) {
@@ -18,7 +20,9 @@ function resolveImage(thumbnail?: string) {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [imgSrc, setImgSrc] = useState(resolveImage(product.thumbnail));
+  const [imgSrc, setImgSrc] = useState(resolveImage(product.thumbnail
+    ? resolveImage(product.thumbnail)
+    : "/placeholder.jpg"));
   const rating = Number(product.rating) || 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {

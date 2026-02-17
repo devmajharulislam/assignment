@@ -21,9 +21,9 @@ export default function Footer() {
                     <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
                     <ul className="space-y-2">
                         <li><Link href="/products" className="hover:text-white transition">Products</Link></li>
-                        <li><Link href="/categories" className="hover:text-white transition">Categories</Link></li>
+                        <li><Link href="/category" className="hover:text-white transition">Categories</Link></li>
                         <li><Link href="/cart" className="hover:text-white transition">Cart</Link></li>
-                        <li><Link href="/user" className="hover:text-white transition">Account</Link></li>
+                        <li><Link href="/profile" className="hover:text-white transition">Account</Link></li>
                     </ul>
                 </div>
 
@@ -31,10 +31,10 @@ export default function Footer() {
                 <div>
                     <h3 className="text-lg font-semibold text-white mb-4">Support</h3>
                     <ul className="space-y-2">
-                        <li><Link href="/nextshop/help" className="hover:text-white transition">Help Center</Link></li>
-                        <li><Link href="/nextshop/shipping" className="hover:text-white transition">Shipping</Link></li>
-                        <li><Link href="/nextshop/returns" className="hover:text-white transition">Returns</Link></li>
-                        <li><Link href="/nextshop/contact" className="hover:text-white transition">Contact</Link></li>
+                        <li><Link href="/" className="hover:text-white transition">Help Center</Link></li>
+                        <li><Link href="/" className="hover:text-white transition">Shipping</Link></li>
+                        <li><Link href="/" className="hover:text-white transition">Returns</Link></li>
+                        <li><Link href="/" className="hover:text-white transition">Contact</Link></li>
                     </ul>
                 </div>
 
@@ -46,7 +46,7 @@ export default function Footer() {
                             <li key={social}>
                                 <Link
                                     key={social}
-                                    href={`/nextshop/${social}`}
+                                    href={`/`}
                                     className="hover:bg-white/20 p-3 rounded-lg transition"
                                 >
                                     <span className="capitalize">{social}</span>

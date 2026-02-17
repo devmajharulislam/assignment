@@ -165,21 +165,13 @@ export default function LoginPage() {
             </button>
 
             {/* Demo Credentials */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-xs text-blue-800 font-semibold mb-2">
-                Demo Credentials:
-              </p>
-              <p className="text-xs text-blue-700">
-                <strong>Email:</strong> manager@nextshop.com
-                <br />
-                <strong>Password:</strong> 123456
-              </p>
-            </div>
+       
+          
 
             {/* Register Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Don&#39;t have an account?{" "}
                 <Link
                   href="/register"
                   className="font-medium text-indigo-600 hover:text-indigo-500"

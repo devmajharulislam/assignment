@@ -43,7 +43,7 @@ export default function Footer() {
                     <h3 className="text-lg font-semibold text-white mb-4">Follow Us</h3>
                     <ul className="space-y-6 gap-4">
                         {["facebook", "twitter", "instagram", "youtube"].map((social) => (
-                            <li key={1}>
+                            <li key={social}>
                                 <Link
                                     key={social}
                                     href={`/nextshop/${social}`}

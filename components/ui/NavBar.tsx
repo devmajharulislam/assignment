@@ -150,7 +150,7 @@ export default function Navbar() {
 
                                         {/* Menu Items */}
                                         <Link
-                                            href="/user"
+                                            href="/profile"
                                             className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 transition-colors"
                                             onClick={() => setShowDropdown(false)}
                                         >
@@ -173,7 +173,7 @@ export default function Navbar() {
                                         </Link>
 
                                         <Link
-                                            href="/orders"
+                                            href="/cart"
                                             className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 transition-colors"
                                             onClick={() => setShowDropdown(false)}
                                         >
@@ -196,7 +196,7 @@ export default function Navbar() {
                                         </Link>
 
                                         <Link
-                                            href="/user"
+                                            href="/profile"
                                             className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 transition-colors"
                                             onClick={() => setShowDropdown(false)}
                                         >
