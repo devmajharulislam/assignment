@@ -480,9 +480,9 @@ export default function CheckoutPage() {
                 </label>
                 <div className="space-y-3">
                   {[
-                    { value: "card", label: "Credit/Debit Card", icon: "💳" },
+                    // { value: "card", label: "Credit/Debit Card", icon: "💳" },
                     { value: "cash", label: "Cash on Delivery", icon: "💵" },
-                    { value: "mobile", label: "Mobile Payment", icon: "📱" },
+                    // { value: "mobile", label: "Mobile Payment", icon: "📱" },
                   ].map((method) => (
                     <label
                       key={method.value}
