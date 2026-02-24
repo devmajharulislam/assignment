@@ -168,7 +168,7 @@ export default function Navbar() {
                                         </Link>
 
                                         <Link
-                                            href="/cart"
+                                            href="/orders"
                                             className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 transition-colors"
                                             onClick={() => setShowDropdown(false)}
                                         >

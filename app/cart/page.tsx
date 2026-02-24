@@ -99,9 +99,11 @@ export default function CartPage() {
               {/* Image */}
               <div className="relative w-32 aspect-square bg-gray-100 flex-shrink-0">
                 <Image
-                    src={product.thumbnail
-                        ? resolveImage(product.thumbnail)
-                        : "/placeholder.jpg"}
+                  src={
+                    product.thumbnail
+                      ? resolveImage(product.thumbnail)
+                      : "/placeholder.jpg"
+                  }
                   alt={product.productName}
                   fill
                   className="object-cover rounded-lg"
@@ -177,12 +179,14 @@ export default function CartPage() {
             <span>${subtotal.toFixed(2)}</span>
           </div>
 
-          <button
-            disabled={cart.length === 0}
-            className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300"
-          >
-            Checkout
-          </button>
+          <Link href="/checkout">
+            <button
+              disabled={cart.length === 0}
+              className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300"
+            >
+              Checkout
+            </button>
+          </Link>
         </div>
       </div>
     </div>

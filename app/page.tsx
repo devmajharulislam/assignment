@@ -50,7 +50,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold mb-2">Fast Delivery</h3>
+              <h3 className="text-lg font-bold mb-2 text-gray-900">
+                Fast Delivery
+              </h3>
               <p className="text-gray-500">
                 Get your products delivered quickly and safely, right to your
                 doorstep.
@@ -73,7 +75,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold mb-2">Premium Quality</h3>
+              <h3 className="text-lg font-bold mb-2 text-gray-900">
+                Premium Quality
+              </h3>
               <p className="text-gray-500">
                 Every product is carefully selected to meet the highest quality
                 standards.
@@ -96,7 +100,9 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold mb-2">Secure Payment</h3>
+              <h3 className="text-lg font-bold mb-2 text-gray-900">
+                Secure Payment
+              </h3>
               <p className="text-gray-500">
                 Your transactions are safe with end-to-end encryption and
                 trusted payment gateways.
@@ -140,7 +146,7 @@ export default function HomePage() {
 
       {/* Call to Action / Newsletter */}
       <section className="py-20 bg-gray-100 text-center">
-        <h2 className="text-3xl font-bold mb-4">Stay Updated!</h2>
+        <h2 className="text-3xl font-bold mb-4 text-gray-900">Stay Updated!</h2>
         <p className="text-gray-600 mb-6">
           Subscribe to our newsletter to receive the latest deals and updates.
         </p>
