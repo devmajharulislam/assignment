@@ -19,13 +19,16 @@ export default function CategoryCard({ category }: CategoryCardProps) {
   const [imgSrc, setImgSrc] = useState<string>(resolveImage(category.imageUrl));
 
   return (
-    <Link href={`/products`}>
+    <Link
+      href={`/products?category=${encodeURIComponent(category.categoryName)}`}
+    >
       <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
             src={imgSrc}
             alt={category.categoryName}
             fill
+            unoptimized
             className="object-cover group-hover:scale-110 transition-transform duration-300"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             onError={() => setImgSrc("/placeholder.jpg")}
@@ -39,8 +42,7 @@ export default function CategoryCard({ category }: CategoryCardProps) {
           </h3>
           {category.children && category.children.length > 0 && (
             <p className="text-xs text-gray-500 mt-1">
-              {category.children.length} sub-categor
-              {category.children.length === 1 ? "y" : "ies"}
+             
             </p>
           )}
         </div>

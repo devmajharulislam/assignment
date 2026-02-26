@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useCartStore } from "@/store/useCartStore";
 
 interface UserInfo {
   firstName: string;
@@ -32,9 +33,13 @@ interface CartItem {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const {cart ,getCart} = useCartStore();
   const [currentStep, setCurrentStep] = useState(1);
   const [cartTotal, setCartTotal] = useState(0);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  useEffect(() => {
+    getCart();
+  }, [getCart]);
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
     firstName: "",
@@ -196,9 +201,9 @@ export default function CheckoutPage() {
 
   const shippingCost = getShippingCost();
   const totalWithShipping = cartTotal + shippingCost;
-  const carts = localStorage.getItem("cart");
+  
 
-            if (carts?.length===0 || carts==null ) router.push("/products")
+            if (!cart|| cart==null ) router.push("/products")
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">

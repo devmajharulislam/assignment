@@ -40,12 +40,9 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    // Load orders from localStorage
-    const storedOrders = localStorage.getItem("orders");
-    if (storedOrders) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOrders(JSON.parse(storedOrders));
-    }
+ 
+
+    
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -159,7 +156,7 @@ export default function OrdersPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-indigo-600">
-                        ${order.total.toFixed(2)}
+                        ${(order.total ?? 0).toFixed(2)}
                       </p>
                       <p className="text-xs text-gray-500">
                         {order.items.length} item
