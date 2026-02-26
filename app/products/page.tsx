@@ -1,15 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useProductsStore } from "@/store/useProductStore";
 import ProductCard from "@/components/ui/ProductCard";
+import ProductFilter from "@/components/ProductFilter";
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get("category");
+
   const { products, loading, error, fetchProducts } = useProductsStore();
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [initialCategories, setInitialCategories] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+      console.log(products)
+  useEffect(() => {
+    setFilteredProducts(products);
+
+    // ✅ Set initial category from URL if present
+    if (categoryFromUrl && products.length > 0) {
+      setInitialCategories([categoryFromUrl]);
+    }
+  }, [products, categoryFromUrl]);
+
+  const handleFilterChange = (filtered: any[]) => {
+    setFilteredProducts(filtered);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,11 +104,44 @@ export default function ProductsPage() {
         )}
 
         {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.productId} product={product} />
-            ))}
-          </div>
+          <>
+            {/* Filter Component */}
+            <ProductFilter
+              products={products}
+              onFilterChange={handleFilterChange}
+              initialCategories={initialCategories}
+            />
+
+            {/* Results Count */}
+            <div className="mb-6">
+              <p className="text-gray-600 font-medium">
+                Showing{" "}
+                <span className="text-indigo-600 font-bold">
+                  {filteredProducts.length}
+                </span>{" "}
+                of <span className="font-bold">{products.length}</span> products
+              </p>
+            </div>
+
+            {/* Products Grid */}
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.productId} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                  No products found
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Try adjusting your filters to see more results
+                </p>
+              </div>
+            )}
+          </>
         )}
       </section>
     </div>

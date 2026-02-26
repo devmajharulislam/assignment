@@ -9,31 +9,110 @@ export interface Product {
   thumbnail: string | null;
   shortDescription: string;
   featured: boolean;
-  quantity: number;
-
-  originalPrice: number;
-  finalPrice: number;
-
-  discount?: {
-    enabled: boolean;
-    type: string;
-    amount: string;
-  };
-
-  stockQuantity: number;
-  inStock: boolean;
-  availability: string;
-
-  shippingCost: string;
-
   rating: string;
   likesCount: number;
   commentsCount: number;
 
+  // Brand
   brand?: {
+    brandId: number;
     brandName: string;
     shortName: string;
   };
+
+  // Category
+  category?: Category;
+
+  // Unit details
+  unit?: {
+    unitId: number;
+    unitName: string;
+    unitValue: string;
+  };
+
+  // User Interaction State
+  userReacted: boolean;
+  userReaction?: UserReaction;
+  userComments: any[]; // Adjust type if comment structure is known
+  comments: any[];
+  reactions: UserReaction[];
+
+  // Settings
+  settings: {
+    isGuestLikeEnable: boolean;
+    isGuestCommentEnable: boolean;
+  };
+
+  // Specifications (Dynamic key-value pairs)
+  specifications: Record<string, Record<string, string[]>>;
+
+  // Variants
+  variants: ProductVariant[];
+
+  // SEO
+  seo: {
+    metaTitle: string | null;
+    metaDescription: string | null;
+  };
+}
+
+// --- Supporting Interfaces ---
+
+export interface Category {
+  categoryId: number;
+  categoryName: string;
+  imageUrl: string;
+  parentId: number | null;
+  status: boolean;
+}
+
+export interface UserReaction {
+  reactionId: number;
+  guestIdentifier: string | null;
+  typeId?: number;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+  } | null;
+  type?: {
+    typeId: number;
+    type: string;
+  };
+  reaction_type?: {
+    typeId: number;
+    type: string;
+  };
+}
+
+export interface ProductVariant {
+  productVariantId: number;
+  productId: number;
+  price: {
+    original: number;
+    final: number;
+  };
+  discount: {
+    enabled: boolean;
+    type: string | null;
+    amount: string;
+  };
+  vat: {
+    enable: boolean;
+    type: string | null;
+    amount: number;
+  };
+  stock: {
+    quantity: number;
+    inStock: boolean;
+    availability: string;
+  };
+  extraInfo: {
+    warranty: string | null;
+    expiredDate: string | null;
+    safetyWarnings: string | null;
+  };
+  attributes: Record<string, string>;
 }
 
 interface ProductsState {
@@ -68,6 +147,7 @@ export const useProductsStore = create<ProductsState>((set) => ({
       }
 
       const data = await res.json();
+      
 
       set({
         products: data.data ?? [],

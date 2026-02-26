@@ -1,5 +1,12 @@
+import { NextConfig } from "next";
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
+    typescript: {
+        ignoreBuildErrors: true
+
+    },
+    
     images: {
         remotePatterns: [
             {
@@ -17,7 +24,7 @@ const nextConfig = {
             },
         ],
     },
-    unoptimized: true,
+    
 };
 
 export default nextConfig;

@@ -4,42 +4,51 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Product } from "@/store/useProductStore";
+import { useCartStore } from "@/store/useCartStore";
 
 interface ProductCardProps {
   product: Product;
-
-  
 }
 
-function resolveImage(thumbnail?: string) {
+function resolveImage(thumbnail?: string | null) {
   if (!thumbnail) return "/placeholder.jpg";
-
   if (thumbnail.startsWith("http")) return thumbnail;
-
   return `${process.env.NEXT_PUBLIC_CDN_BASEURL}/${thumbnail}`;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [imgSrc, setImgSrc] = useState(resolveImage(product.thumbnail
-    ? resolveImage(product.thumbnail)
-    : "/placeholder.jpg"));
+  const { addToCart } = useCartStore();
+  
+  // Pull the primary data from the first variant
+  const primaryVariant = product.variants?.[0];
+  const isInStock = primaryVariant?.stock?.inStock ?? false;
+  const price = primaryVariant?.price?.original ?? 0;
+
+  const [imgSrc, setImgSrc] = useState(resolveImage(product.thumbnail));
+  const [adding, setAdding] = useState(false);
   const rating = Number(product.rating) || 0;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
 
-    const stored = localStorage.getItem("cart");
-    const cart: Product[] = stored ? JSON.parse(stored) : [];
+    if (!primaryVariant?.productVariantId) {
+      alert("Product variant not available");
+      return;
+    }
 
-    const exists = cart.find((p) => p.productId === product.productId);
+    setAdding(true);
+    const success = await addToCart(
+      product.productId,
+      primaryVariant.productVariantId,
+      1
+    );
 
-    if (!exists) {
-      cart.push({ ...product, quantity: 1 });
-      localStorage.setItem("cart", JSON.stringify(cart));
+    if (success) {
       alert(`${product.productName} added to cart!`);
     } else {
-      alert(`${product.productName} is already in the cart`);
+      alert("Failed to add to cart. Please try again.");
     }
+    setAdding(false);
   };
 
   return (
@@ -51,12 +60,13 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={imgSrc}
             alt={product.productName}
             fill
+            unoptimized
             className="object-cover group-hover:scale-110 transition-transform duration-300"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onError={() => setImgSrc("/placeholder.jpg")}
           />
 
-          {!product.inStock && (
+          {!isInStock && (
             <div className="absolute top-3 left-3 bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold">
               Out of Stock
             </div>
@@ -101,20 +111,20 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Price */}
           <span className="text-2xl font-bold text-gray-900">
-            ${Number(product.finalPrice || 0).toFixed(2)}
+            ${price.toFixed(2)}
           </span>
 
           {/* Add to Cart */}
           <button
             className={`mt-4 w-full py-2.5 rounded-lg font-medium transition-colors ${
-              product.inStock
+              isInStock && !adding
                 ? "bg-indigo-600 text-white hover:bg-indigo-700"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
-            disabled={!product.inStock}
+            disabled={!isInStock || adding}
             onClick={handleAddToCart}
           >
-            {product.inStock ? "Add to Cart" : "Out of Stock"}
+            {adding ? "Adding..." : isInStock ? "Add to Cart" : "Out of Stock"}
           </button>
         </div>
       </div>
