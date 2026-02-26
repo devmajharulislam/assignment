@@ -144,7 +144,7 @@ export const useCartStore = create<CartState>((set, get) => ({
             });
 
             if (!res.ok) {
-                throw new Error("Failed to fetch cart");
+               console.log("error occured fetching Cart")
             }
 
             const data = await res.json();

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore, CartItem } from "@/store/useCartStore";
+// import { useOrdersStore } from "@/store/useOrderStore";
 
 function resolveImage(thumbnail?: string | null) {
   if (!thumbnail) return "/placeholder.jpg";
@@ -19,10 +20,13 @@ export default function CartPage() {
 
   // Local state for optimistic updates
   const [localCart, setLocalCart] = useState<typeof cart>(null);
+  // const {orders,getOrders} = useOrdersStore();
 
   useEffect(() => {
     getCart();
   }, [getCart]);
+
+  
 
   // Sync local cart with store cart
   useEffect(() => {
