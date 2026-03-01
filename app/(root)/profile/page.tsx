@@ -7,12 +7,13 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 export default function UserPage() {
   const router = useRouter();
-  const { user, logout, checkSession } = useAuthStore();
+  const { user, logout, checkSession,isAdmin } = useAuthStore();
 
   useEffect(() => {
     checkSession();
-  }, [checkSession]);
-
+  }, []);
+  
+console.log(isAdmin)
   useEffect(() => {
     if (user === null) {
       router.push("/login");
