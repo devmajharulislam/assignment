@@ -12,6 +12,7 @@ interface AuthState {
   loading: boolean;
   isAuthenticated: boolean;
   isInitialized: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   checkSession: () => Promise<void>;
   logout: () => void;
@@ -47,6 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: false,
   isAuthenticated: false,
   isInitialized: false,
+  isAdmin: false,
 
   initAuth: async () => {
     // console.log("🔄 Initializing auth...");
@@ -146,7 +148,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkSession: async () => {
-    const token = get().token;
+
+    const token = localStorage.getItem("auth_token")
+    // const token = get().token;
 
     if (!token) {
       // console.log("❌ No token to check");
@@ -177,6 +181,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const data = await res.json();
+      console.log(data.data.role)
+      if(data.data.role==="admin"){
+        set({
+          isAdmin: true
+        })
+      } else {
+        set({
+          isAdmin: false
+        })
+      }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("auth_user", JSON.stringify(data.data));

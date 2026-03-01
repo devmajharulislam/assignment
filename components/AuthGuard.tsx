@@ -22,10 +22,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // Only redirect after initialization is complete
     if (isInitialized) {
       if (!isAuthenticated && !isPublicRoute) {
-        console.log("🚫 Not authenticated, redirecting to login");
+        // console.log("🚫 Not authenticated, redirecting to login");
         router.replace("/login");
       } else if (isAuthenticated && isPublicRoute) {
-        console.log("✅ Already authenticated, redirecting to home");
+        // console.log("✅ Already authenticated, redirecting to home");
         router.replace("/");
       }
     }
@@ -69,7 +69,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   // Show children only if authenticated or on public route
   return (
     <>
-     
+    
       {children}
     </>
   );
