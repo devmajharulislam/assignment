@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useProductsStore } from "@/store/useProductStore";
 import { useCartStore } from "@/store/useCartStore";
-import Reactions from "@/components/Reactions";
+
 import { useReactionsStore } from "@/store/useReactionStore";
 
 
