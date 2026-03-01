@@ -71,28 +71,20 @@ function resolveImage(thumbnail?: string | null) {
     return `${process.env.NEXT_PUBLIC_CDN_BASEURL}/${thumbnail}`;
 }
 
-const reactionEmojis: Record<string, string> = {
-    like: "👍",
-    love: "❤️",
-    wow: "😮",
-    haha: "😂",
-    sad: "😢",
-};
 
 export default function ProductDetailsPage() {
     const {
       reactionTypes,
-      fetchReactionTypes,
+      getReactionTypes,
       addReaction,
       deleteReaction
       
     } = useReactionsStore();
 
     useEffect(()=>{
-        fetchReactionTypes();
-
+        getReactionTypes();
     },[])
-        console.log("res", reactionTypes);
+       
     // console.log("Reaction types ", reactionTypes)
     const params = useParams();
     const slug = typeof params?.slug === "string" ? params.slug : "";
@@ -147,50 +139,7 @@ export default function ProductDetailsPage() {
         load();
     }, [slug, fetchProductBySlug]);
 
-    useEffect(() => {
-        async function fetchReactionTypes() {
-            try {
-                const res = await fetch(`${API}/client/v1/product/reaction-types`, {
-                    headers: { "Content-Type": "application/json", "X-Tenant": "nextshop" },
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    setReactionTypes(data.data || []);
-                }
-            } catch (err) { console.error(err); }
-        }
-        fetchReactionTypes();
-    }, []);
-
-    const handleReaction = async (typeId: number) => {
-        if (!product) return;
-        try {
-            const token = localStorage.getItem("auth_token");
-            const res = await fetch(`${API}/client/v1/product/reaction`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Tenant": "nextshop",
-                    ...(token && { Authorization: `Bearer ${token}` }),
-                },
-                body: JSON.stringify({ productId: product.productId, typeId }),
-            });
-
-            if (res.ok) {
-                if (userReaction === typeId) {
-                    setUserReaction(null);
-                    setReactionCounts(prev => ({ ...prev, [typeId]: Math.max((prev[typeId] || 0) - 1, 0) }));
-                } else {
-                    if (userReaction) {
-                        setReactionCounts(prev => ({ ...prev, [userReaction]: Math.max((prev[userReaction] || 0) - 1, 0) }));
-                    }
-                    setUserReaction(typeId);
-                    setReactionCounts(prev => ({ ...prev, [typeId]: (prev[typeId] || 0) + 1 }));
-                }
-                setShowReactions(false);
-            }
-        } catch (err) { console.error(err); }
-    };
+    
 
     const handleAddComment = async () => {
         if (!product || !newComment.trim()) return;
@@ -225,7 +174,7 @@ export default function ProductDetailsPage() {
     if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600"></div></div>;
     if (!product) return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
 
-    const totalReactions = Object.values(reactionCounts).reduce((sum, count) => sum + count, 0);
+    // const totalReactions = Object.values(reactionCounts).reduce((sum, count) => sum + count, 0);
 
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -365,11 +314,11 @@ export default function ProductDetailsPage() {
           </div>
           {/* Internal Reactions UI */}
           
-          <Reactions
+          {/* <Reactions
             productId={product.productId}
             initialUserReaction={product.userReaction}
             initialReactions={product.reactions}
-          />
+          /> */}
           {/* Comments */}
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <h3 className="text-xl font-bold text-gray-900 mb-4">

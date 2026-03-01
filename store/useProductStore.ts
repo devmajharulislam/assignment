@@ -143,7 +143,7 @@ export const useProductsStore = create<ProductsState>((set) => ({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch products");
+       console.log("errpr fetching products")
       }
 
       const data = await res.json();
