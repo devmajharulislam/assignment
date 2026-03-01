@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 function resolveImage(thumbnail?: string | null) {
     if (!thumbnail) return "/placeholder.jpg";
-    if (thumbnail.startsWith("http")) return thumbnail;
+    if (thumbnail.startsWith("http")) return "/placeholder.jpg";
     return `${process.env.NEXT_PUBLIC_CDN_BASEURL}/${thumbnail}`;
 }
 

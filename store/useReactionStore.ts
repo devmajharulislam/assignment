@@ -82,7 +82,7 @@ export const useReactionsStore = create<ReactionsState>((set, get) => ({
       }
 
       const data = await res.json();
-      console.log("Reaction types response:", data);
+
 
       set({
         reactionTypes: data.data || [],
